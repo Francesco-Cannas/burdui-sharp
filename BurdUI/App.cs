@@ -60,6 +60,7 @@ public class App : Control
         this.SizeChanged += (s, e) =>
         {
             ResizeBitmapIfNeeded();
+            this.InvalidateVisual();
         };
     }
 
@@ -119,6 +120,7 @@ public class App : Control
             var dpi = new Vector(96, 96);
 
             _bitmap = new RenderTargetBitmap(size, dpi);
+            burdUIContext.Dispose();
             burdUIContext = _bitmap.CreateDrawingContext();
         }
     }
