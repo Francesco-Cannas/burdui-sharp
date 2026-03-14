@@ -61,13 +61,13 @@ namespace BurdUI
         /// <summary>
         /// Lays out children, then defers to base to paint them.
         /// </summary>
-        public override void Paint(DrawingContext g)
+        public override void Paint(DrawingContext g, Rect clip)
         {
             // Compute child bounds before drawing
             LayoutChildren();
 
             // base.Paint will translate by this.Bounds and then paint children using their relative Bounds
-            base.Paint(g);
+            base.Paint(g, clip);
         }
     }
 }

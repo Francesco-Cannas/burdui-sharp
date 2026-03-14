@@ -17,8 +17,14 @@ public class View
     [XmlArrayItem("VerticalLayoutPanel", typeof(VerticalLayoutPanel))]
 
     public List<View> Children { get; internal set; }
+
+    [XmlIgnore]
+    public View? Parent { get; internal set; }
     
-    
+    [XmlIgnore]
+    public App? App { get; set; }
+
+
     [XmlAttribute("Bounds")]
     public string BoundsAttr
     {
@@ -52,15 +58,26 @@ public class View
     {
         this.Children = new List<View>();
     }
-    
+
 
     public virtual void Paint(DrawingContext ctx)
     {
+        Paint(ctx, Bounds);
+    }
+    
+    public virtual void Paint(DrawingContext ctx, Rect clip)
+    {
         using (ctx.PushTransform(Matrix.CreateTranslation(Bounds.X, Bounds.Y)))
         {
+            var localClip = new Rect(
+                clip.X - Bounds.X, clip.Y - Bounds.Y,
+                clip.Width, clip.Height
+                );
+            
             foreach (var child in Children)
             {
-                child.Paint(ctx);
+                var childClip = child.Bounds.Intersect(localClip);
+                child.Paint(ctx, childClip);
             }
         }    
         // Draw final border rectangle
@@ -71,6 +88,35 @@ public class View
 
     public void AddChild(View child)
     {
+        child.Parent = this;
         this.Children.Add(child);
+    }
+    
+    public void Invalidate()
+    {
+        this.Invalidate(new RepaintEvent()
+        {
+            Source = this, 
+            DamagedArea =  Bounds
+        });
+    }
+
+    public void Invalidate(RepaintEvent evt)
+    {
+        if (this.Parent == null)
+        {
+            this.App?.PushEvent(evt);
+        }
+        else
+        {
+            var parentDamagedArea = new Rect(
+                evt.DamagedArea.X  + Bounds.X,
+                evt.DamagedArea.Y  + Bounds.Y,
+                evt.DamagedArea.Width,
+                evt.DamagedArea.Height);
+            evt.DamagedArea = parentDamagedArea;
+            this.Parent.Invalidate(evt);
+            
+        }
     }
 }

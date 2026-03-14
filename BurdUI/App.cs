@@ -24,21 +24,23 @@ public class App : Control
     private const int MaxWidth = 2560;
     private const int MaxHeight = 1440;
     
-    private RenderTargetBitmap _bitmap;
+    public RenderTargetBitmap _bitmap;
     private int _width = 800;
     private int _height = 600;
-    private DrawingContext burdUIContext;
+    private Queue<BurdUIEvent> q;
 
     public View? Root { get; set; }
 
     public App()
     {
+        q = new Queue<BurdUIEvent>();
+        
         // init BurdUI graphics context
         var size = new PixelSize(MaxWidth, MaxHeight);
-        var dpi = new Vector(192, 192);
+        var dpi = new Vector(96, 96);
 
         _bitmap = new RenderTargetBitmap(size, dpi);
-        burdUIContext = _bitmap.CreateDrawingContext();
+        
 
         Focusable = true;
 
@@ -91,8 +93,6 @@ public class App : Control
     {
         base.Render(ctx);
         
-        // painting BurdUI
-        Root?.Paint(burdUIContext);
 
        // passing the result to the Avalonia Window
         ctx.DrawImage(
@@ -101,5 +101,53 @@ public class App : Control
             destRect: new Rect(0, 0, MaxWidth, MaxHeight));
     }
 
+
+    public void Paint()
+    {
+        using (var burdUIContext = _bitmap.CreateDrawingContext(false))
+        {
+            Root.Paint(burdUIContext);
+        }
+    }
+    public void Paint(Rect r)
+    {
+        using (var burdUIContext = _bitmap.CreateDrawingContext(false))
+        {
+            Root.Paint(burdUIContext, r);
+        }
+    }
+    
+    public void FlushQueue()
+    {
+        var damagedArea = new Rect(0, 0, 0, 0);
+        while (q.Count > 0)
+        {
+            var e = q.Dequeue();
+            switch (e.Type)
+            {
+                case BurdUIEventType.Repaint:
+                    if (e is RepaintEvent repaintEvt)
+                    {
+                        // we could paint it immediately ...
+                        //this.Paint(repaintEvt.DamagedArea);
+                        
+                        //or accumulate and paint at the end
+                        damagedArea = damagedArea.Union(repaintEvt.DamagedArea);
+                    }
+                    
+                    break;
+            }
+        }
+
+        if (damagedArea.Width > 0 && damagedArea.Height > 0)
+        {
+            this.Paint(damagedArea);
+        }
+    }
+
+    public void PushEvent(BurdUIEvent burdUIEvent)
+    {
+        q.Enqueue(burdUIEvent);
+    }
     
 }
