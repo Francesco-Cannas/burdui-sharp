@@ -1,67 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+using System;
 using Avalonia;
 using Avalonia.Media;
 using BurdUI.Utils;
 
 namespace BurdUI
 {
-    public enum VerticalStackOrigin
+    public enum HorizontalStackOrigin
     {
-        Top,
-        Bottom
+        Left,
+        Right
     }
 
     [Serializable]
-    public class VerticalLayoutPanel : View
+    public class HorizontalLayoutPanel : View
     {
-        public Border Border { get; set; }
         
+        public Border Border { get; set; }
         /// <summary>
-        /// Whether children are laid out from the top or from the bottom.
+        /// Whether children are laid out from the left or from the right.
         /// </summary>
-        public VerticalStackOrigin Origin { get; set; } = VerticalStackOrigin.Top;
+        public HorizontalStackOrigin Origin { get; set; } = HorizontalStackOrigin.Left;
 
         /// <summary>
-        /// Vertical spacing (in pixels) between consecutive children.
+        /// Horizontal spacing (in pixels) between consecutive children.
         /// </summary>
         public double Spacing { get; set; } = 0;
 
-        public VerticalLayoutPanel()
+        public HorizontalLayoutPanel()
         {
             this.Border = new Border();
         }
 
         /// <summary>
         /// Performs the layout of children based on panel Bounds and Origin.
-        /// Children are sized to fill the panel width, and their height is taken from their current Bounds.Height.
-        /// Child Bounds are assigned in the panel's local coordinates (relative to this view),
-        /// since View.Paint translates by this.Bounds before painting children.
+        /// Children are sized to fill the panel height, and their width is taken
+        /// from their current Bounds.Width.
+        /// Child Bounds are assigned in the panel's local coordinates.
         /// </summary>
         private void LayoutChildren()
         {
-            double innerWidth = Math.Max(0.0, this.Bounds.Width);
+            double innerHeight = Math.Max(0.0, this.Bounds.Height);
 
-            if (Origin == VerticalStackOrigin.Top)
+            if (Origin == HorizontalStackOrigin.Left)
             {
-                double y = 0;
+                double x = 0;
                 foreach (var child in this.Children)
                 {
-                    double h = Math.Max(0, child.Bounds.Height);
-                    child.Bounds = new Rect(0, y, innerWidth, h);
-                    y += h + Spacing;
+                    double w = Math.Max(0, child.Bounds.Width);
+                    child.Bounds = new Rect(x, 0, w, innerHeight);
+                    x += w + Spacing;
                 }
             }
-            else // VerticalStackOrigin.Bottom
+            else // HorizontalStackOrigin.Right
             {
-                double y = this.Bounds.Height;
+                double x = this.Bounds.Width;
                 foreach (var child in this.Children)
                 {
-                    double h = Math.Max(0, child.Bounds.Height);
-                    y -= h; // reserve space for the child
-                    child.Bounds = new Rect(0, y, innerWidth, h);
-                    y -= Spacing;
+                    double w = Math.Max(0, child.Bounds.Width);
+                    x -= w; // reserve space
+                    child.Bounds = new Rect(x, 0, w, innerHeight);
+                    x -= Spacing;
                 }
             }
         }
@@ -85,7 +83,7 @@ namespace BurdUI
                 this.Border?.Draw(g, thickBounds);
             }
 
-            // base.Paint will translate by this.Bounds and then paint children using their relative Bounds
+            // base.Paint handles translation by this.Bounds and child painting
             base.Paint(g, clip);
         }
     }

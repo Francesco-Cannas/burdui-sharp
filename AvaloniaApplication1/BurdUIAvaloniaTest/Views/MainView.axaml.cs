@@ -12,7 +12,7 @@ public partial class MainView : Avalonia.Controls.UserControl
     {
         InitializeComponent();
 
-        BurdUiApp.Root = RepaintTest1();
+        BurdUiApp.Root = LoginPanel();
         BurdUiApp.Paint();
         
         
@@ -144,5 +144,62 @@ public partial class MainView : Avalonia.Controls.UserControl
         
 
         return root;
+    }
+
+
+    public View LoginPanel()
+    {
+        var panel = new VerticalLayoutPanel();
+        panel.Border.BackgroudColor = Colors.White;
+        panel.Border.Color = Colors.White;
+        panel.Origin = VerticalStackOrigin.Top;
+        panel.Bounds = new Rect(10, 10, 300, 300);
+
+        Label title = new Label("Authentication");
+        title.Text?.Color = Colors.Red;
+        title.Text.HorizontalAlignment = AlignedText.HorizontalTextAlignment.Center;
+        title.Bounds = new Rect(0, 0, 300, 30);
+
+        var h1 = new HorizontalLayoutPanel();
+        h1.Border.BackgroudColor = Colors.Transparent;
+        h1.Border.Color = Colors.Transparent;
+        h1.Origin = HorizontalStackOrigin.Left;
+        h1.Bounds = new Rect(0, 0, 300, 30);
+        
+        var l1 = new Label("Username");
+        l1.Text?.Color = Colors.Black;
+        l1.Bounds = new Rect(10, 0, 100, 30);
+        var txt1 = new TextField();
+        txt1.Bounds = new Rect(0, 0, 180, 30);
+        h1.AddChild(l1);
+        h1.AddChild(txt1);
+        
+        var h2 = new HorizontalLayoutPanel();
+        h2.Border.BackgroudColor = Colors.Transparent;
+        h2.Border.Color = Colors.Transparent;
+        h2.Origin = HorizontalStackOrigin.Left;
+        h2.Bounds = new Rect(0, 0, 300, 30);
+        
+        var l2 = new Label("Password");
+        l2.Text?.Color = Colors.Black;
+        l2.Bounds = new Rect(10, 0, 100, 30);
+        var txt2 = new TextField();
+        txt2.Bounds = new Rect(0, 0, 180, 30);
+        h2.AddChild(l2);
+        h2.AddChild(txt2);
+        
+        
+        var btn = new Button("Login");
+        btn.Text?.Color = Colors.DarkRed;
+        btn.Border?.BackgroudColor = Colors.LightPink;
+        btn.Border?.Color = Colors.DarkRed;
+        btn.Bounds = new Rect(0, 0, 300, 30);
+        
+        panel.AddChild(title);
+        panel.AddChild(h1);
+        panel.AddChild(h2);
+        panel.AddChild(btn);
+
+        return panel;
     }
 }

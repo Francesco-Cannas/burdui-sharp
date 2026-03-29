@@ -12,6 +12,8 @@ public class View
     [XmlIgnore]
     public Rect Bounds { get; set; }
     
+    
+    
     [XmlArray("Children")]   
     [XmlArrayItem("Button", typeof(Button))]
     [XmlArrayItem("VerticalLayoutPanel", typeof(VerticalLayoutPanel))]
@@ -83,8 +85,8 @@ public class View
             }
         }    
         // Draw final border rectangle
-        var pen = new Pen(Brushes.Red, 1);    
-        ctx.DrawRectangle(pen, Bounds);
+        //var pen = new Pen(Brushes.Red, 1);    
+        //ctx.DrawRectangle(pen, Bounds);
        
     }
 

@@ -1,34 +1,30 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using System.Xml.Serialization;
 using Avalonia;
 using Avalonia.Media;
 using BurdUI.Utils;
 
 namespace BurdUI;
 
-[Serializable]
-public class Button : View
+public class TextField: View
 {
-    
     public Border? Border { get; set; }
     public AlignedText? Text { get; set; }
     
-
-
-    public Button()
-    {
-        Border = new Border();
-        Text = new AlignedText();
-    }
-    public Button(string label = ""):
-    this()
+    public TextField(string label = "")
     {
         this.Text = new AlignedText(label)
         {
-            HorizontalAlignment = AlignedText.HorizontalTextAlignment.Center,
+            HorizontalAlignment = AlignedText.HorizontalTextAlignment.Left,
             VerticalAlignment = AlignedText.VerticalTextAlignment.Middle
         };
+
+        this.Border = new Border()
+        {
+            BackgroudColor = Colors.White,
+            Color =  Colors.Black,
+            CornerRadius = 4
+        };
     }
+    
     public override void Paint(DrawingContext g, Rect clip)
     {
         
@@ -46,4 +42,5 @@ public class Button : View
         }
         
     }
+    
 }

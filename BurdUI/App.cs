@@ -1,4 +1,6 @@
-﻿namespace BurdUI;
+﻿using Avalonia.Threading;
+
+namespace BurdUI;
 
 using System;
 using Avalonia;
@@ -30,6 +32,8 @@ public class App : Control
     private Queue<BurdUIEvent> q;
 
     public View? Root { get; set; }
+    
+    private DispatcherTimer _timer;
 
     public App()
     {
@@ -56,34 +60,93 @@ public class App : Control
             var p = e.GetPosition(this);
             OnMouseMove(p.X, p.Y, e);
         };
+        
+        PointerReleased += (s, e) =>
+        {
+            var p = e.GetPosition(this);
+            OnMouseReleased(p.X, p.Y, e);
+        };
 
         KeyDown += (s, e) =>
         {
-            OnKey(e.Key);
+            OnKeyDown(e.Key);
         };
         
+        KeyUp += (s, e) =>
+        {
+            OnKeyUp(e.Key);
+        };
+
+        _timer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(100)
+        };
+        _timer.Tick += (s, e) =>
+        {
+            FlushQueue();
+        };
+
     }
-
-    // ==========================
-    // EVENTI PASSATI A TE
-    // ==========================
-
+    
+    protected virtual void OnMouseReleased(double x, double y, PointerReleasedEventArgs e)
+    {
+        var m = CreateMouseEvent(x, y, e);
+        m.Type = BurdUIEventType.MouseUp;
+        q.Enqueue(m);
+    }
+    
     protected virtual void OnMouseDown(double x, double y, PointerPressedEventArgs e)
     {
-        //TODO: add management
+        var m = CreateMouseEvent(x, y, e);
+        m.Type = BurdUIEventType.MouseDown;
+        q.Enqueue(m);
     }
 
     protected virtual void OnMouseMove(double x, double y, PointerEventArgs e)
     {
-        //TODO: add management
+        var m = CreateMouseEvent(x, y, e);
+        m.Type = BurdUIEventType.MouseMove;
+        q.Enqueue(m);
     }
     
 
-    protected virtual void OnKey(Key key)
+    protected virtual void OnKeyDown(Key key)
     {
-        //TODO: add management
+        var k =  CreateKeyEvent(key);
+        k.Type = BurdUIEventType.KeyDown;
+        q.Enqueue(k);
+    }
+    
+    protected virtual void OnKeyUp(Key key)
+    {
+        var k =  CreateKeyEvent(key);
+        k.Type = BurdUIEventType.KeyUp;
+        q.Enqueue(k);
     }
 
+    private MouseEvent CreateMouseEvent(double x, double y, PointerEventArgs e)
+    {
+        var m = new MouseEvent
+        {
+            X = x,
+            Y = y,
+            ScreenX = x,
+            ScreenY = y,
+            Modifiers = e.KeyModifiers, 
+            Timestamp = DateTime.Now.Ticks,
+            Type = BurdUIEventType.MouseMove
+        };
+        return m;
+    }
+
+    private KeyEvent CreateKeyEvent(Key key)
+    {
+        var m = new KeyEvent
+        {
+            Key = key,
+        };
+        return m;
+    }
 
     /// <summary>
     /// Renders the BurdUI applications on an Avalonia Window
@@ -136,6 +199,9 @@ public class App : Control
                     }
                     
                     break;
+                
+                
+                    
             }
         }
 
